@@ -19,7 +19,7 @@ export const loginTeacher = handler(async (req, res) => {
   
     const [accessToken, refreshToken] = [
       staff.generateAccessToken('Teacher'),
-      await staff.generateRefreshToken(staff, 'Teacher'),
+      await staff.generateRefreshToken('Teacher'),
     ];
   
     res

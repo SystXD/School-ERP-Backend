@@ -39,18 +39,16 @@ export const Staff = model<IStaff>(
             { expiresIn: "1d" }
           );
         },
-        async generateRefreshToken(this, role:string) {
-          const token = jwt.sign(
+        async generateRefreshToken(role:string) {
+         return jwt.sign(
             {
               _id: this._id,
               role: role
             },
             process.env.JWTRefreshSecret as string,
             { expiresIn: "7d" }
-          );
-          this.refreshToken = token;
-          await this.save();
-          return token;
+          );;
+          
         },
       },
     }

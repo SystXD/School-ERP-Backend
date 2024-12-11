@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { ApiError, ApiResponse } from "../../lib/structures";
 import { handler, TimeLimit } from "../../lib/utils";
 import { Staff } from "../../models/staff.model";
@@ -19,8 +20,11 @@ export const loginAdmin = handler(async (req, res) => {
 
   const [accessToken, refreshToken] = [
     staff.generateAccessToken("Admin"),
-    await staff.generateRefreshToken(staff, "Admin"),
+    await staff.generateRefreshToken("Admin"),
   ];
+
+  staff.refreshToken = refreshToken;
+  await staff.save();
 
   res
     .status(200)
@@ -32,7 +36,7 @@ export const loginAdmin = handler(async (req, res) => {
     .cookie("refreshToken", refreshToken, {
       secure: process.env.NODE_ENV === "development",
       httpOnly: false,
-      maxAge: TimeLimit.SevenDay,
+      maxAge: TimeLimit.OneDay,
     })
     .json(new ApiResponse(200, "The user is now logged in"));
 });
@@ -104,23 +108,24 @@ export const getStaff = handler(async (req, res) => {
   if (Object.keys(req.params).length > 1)
     throw new ApiError(400, "More than 1 Params Received in Request");
 
-  if (all) {
-    res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          "Fetched all staffs",
-          await Staff.find().select("-password -accessToken -refreshToken")
-        )
-      );
-  } else if (creds) {
+  if (creds) {
     res.status(200).json(
       new ApiResponse(200, "Fetched all staffs", {
         value: await Staff.findOne({
           $or: [{ email: creds }, { username: creds }],
         }).select("-password -accessToken -refreshToken"),
       })
+    );
+  
+  } else if (all) {
+    res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "Fetched all staffs",
+        await Staff.find().select("-password -accessToken -refreshToken")
+      )
     );
   } else {
     res.status(400).json(new ApiResponse(404, "Invalid Request Or Params"));

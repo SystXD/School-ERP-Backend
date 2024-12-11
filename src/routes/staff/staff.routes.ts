@@ -22,6 +22,6 @@ router
   .patch(verifyAdmin, verifyJWTRefresh, updateStaff);
 
   router
-  .route('/login')
+  .route('/staff/login')
   .post(loginAdmin)
 export default router;

@@ -9,5 +9,5 @@ export interface IStaff extends Document {
   department:string;
   suspended?: boolean;
   generateAccessToken(role:string): string;
-  generateRefreshToken(staff:this, role:string): Promise<string>;
+  generateRefreshToken(role:string): Promise<string>;
 }
