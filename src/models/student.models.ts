@@ -46,7 +46,7 @@ export const Student = model(
 
       studentID: {
         type: String,
-        default: crypto.randomUUID,
+        default: crypto.randomUUID(),
       },
     },
     { timestamps: true }
