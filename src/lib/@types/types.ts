@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Schema } from "mongoose";
 import { Student } from "../../models/student.models";
 
 export interface IStaff extends Document {
@@ -15,6 +15,8 @@ export interface IStaff extends Document {
 
 
 
+
+
 export type ExamInterface = {
   examName?: string
   examDate?:string,
@@ -26,3 +28,35 @@ export type ExamsOption = {
   exams: ExamInterface[]
 }
 
+
+export interface StudentInfo extends Document {
+  name: string;
+  classInfo: {
+    class: Schema.Types.ObjectId,
+    rollNo?:String,
+    section: String,
+    sectionName: String,
+    className: String,
+  },
+
+  dob: String
+
+  fatherName: String
+
+  motherName: String
+
+  subjects: [
+    {
+      subjectName: { type: String },
+      exams: [
+        {
+          examName: { type: String, required: true },
+          examDate: { type: String },
+          grade: { type: String, required: true },
+        },
+      ],
+    },
+  ],
+
+  studentID:String
+}

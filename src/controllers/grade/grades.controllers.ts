@@ -1,3 +1,4 @@
+import { StudentInfo } from "../../lib/@types/types";
 import { ApiError, ApiResponse } from "../../lib/structures";
 import { handler, validateSubjects } from "../../lib/utils";
 import { Student } from "../../models/student.models";
@@ -9,6 +10,10 @@ export const updateExamGrades = handler(async (req, res) => {
     studentName,
     section,
     subjects,
+    examName,
+    examDate,
+    subjectName,
+    grade,
   } = req.body;
 
   const students = await Student.aggregate([
@@ -47,15 +52,13 @@ export const updateExamGrades = handler(async (req, res) => {
     },
   ]);
 
-
-
   if (students.length < 0 || !students)
     throw new ApiError(
       404,
       "Unable to locate students with provided credentials"
     );
 
-  const student = students[0];
+  const student = students[0] as StudentInfo;
 
   if (!Array.isArray(subjects)) throw new ApiError(404, "Bad Request");
 
@@ -65,20 +68,23 @@ export const updateExamGrades = handler(async (req, res) => {
 
   if (!isValidSubjects) throw new ApiError(400, "Bad Request for Subjects");
 
-  const updatedStudent = await Student.findByIdAndUpdate(
-    student._id,
-    {
-      $set: {
-        subject: subjects,
-      },
-    },
-    { new: true }
-  )
-  .select("-_id")
+  const index = student.subjects.find((sub) => sub.subjectName === subjectName);
 
-  if (!updatedStudent) throw new ApiError(404, "Unable to locate student with provided credentials")
+  if (index) {
+    await Student.updateOne(
+      { _id: student._id, "subjects.subjectName": subjectName },
+      { $push: { "subjects.$.exams": { examName, examDate, grade } } }
+    );
+  } else {
+    await Student.updateOne(
+      { _id: student._id },
+      {
+        $push: {
+          subjects: { subjectName, exams: [{ examName, examDate, grade }] },
+        },
+      }
+    );
+  }
 
-  res
-    .status(200)
-    .json(new ApiResponse(200, "Updated studebt grades", updatedStudent));
+  res.status(200).json(new ApiResponse(200, "Updated student  grades"));
 });

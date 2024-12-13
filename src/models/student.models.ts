@@ -31,7 +31,7 @@ export const Student = model(
         required: true,
       },
 
-      subject: [
+      subjects: [
         {
           subjectName: { type: String },
           exams: [
